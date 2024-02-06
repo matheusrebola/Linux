@@ -1,0 +1,282 @@
+Capitulo 3
+@NESTE CAPÍTULO
+	ENTENDENDO O SHELL DO LINUX
+	USANDO SHELL A PARTIR DE CONSOLES OU TERMINAIS
+	USANDO COMANDOS
+	USANDO O HISTÓRICO DE COMANDOS E O COMPLETAMENTO DE COMANDO COM TAB
+	CONECTANDO E EXPANDINDO COMANDOS
+	ENTENDO VARIÁVEIS E ALIASES
+	TORNANDO AS CONFIGURAÇÕES DE SHELL PERMANENTES
+	USANDO PÁGINAS MAN E OUTRAS DOCUMENTAÇÕES
+
+#ESCOLHENDO SEU SHELL
+		$ whoami
+	Exibe seu nome de usuário
+		$ grep matheus /etc/passwd
+	Exibe a definição de sua conta de usuário no arquivo /etc/password. O último campo dessa entrada exibe que o shell bash (/bin/bash) é o shell pardão (aquele que inicia quando você faz login ou abre uma janela de terminal)
+
+#EXECUTANDO COMANDOS
+	A maneira mais simples de executar um comando é simplesmente digitar o nome do comando a partir de um shell.
+	##ENTENDENDO A SINTAXE DE COMANDO
+		$ tar -cvf backup.tar /home/matheus
+	No exemplo do comando tar anterior, as opções instruem o comando a criar (c) um arquivo (f) chamado "backup.tar" que inclui todo o conteúdo do diretório /home/matheus e seus subdiretórios e exibe mensagens verbosas (v) 
+	conforme o backup é feito
+	Como "backup.tar" é um arqumento para a opção "f", "backup.tar" deve vir imediatamente após a opção
+		$ uname
+		$ ls
+		
+		$ date +'%A, %B %d , %Y'
+		Sunday, December 04, 2011
+
+		$ id
+		$ who -uH
+	Você pode ver informações sobre sua sessão atual usando o comando "who". No exemplo acima, a opção -u diz para adicionar informações sobre o tempo ocioso e o ID do processo -H pede que um cabeçalho seja impresso
+	##NOTA: Distribuições Linux que tenha Security Enhanced Linux (SELinux) ativado, como o Fedora e RHEL, mostram informações adicionais no final da saída id. A maioria dos usuários não precisa se preocupar com o SELinux, a menos
+	##que eles estejam configurando servidores.
+
+	##LOCALIZANDO COMANDOS
+	Para localizar comandos que você digita, o shell procura no que é chamado de 'caminho' (path). Para comandos que não estão em seu caminho, você pode digitar a identidade completa da localização deles.
+	Se você sabe o diretório que contém o comando que deseja executar, uma maneira de executá-lo é digitar o caminho completo, ou absoluto, para o comando. Por exemplo você executa o comando "date" do diretório /bin digitando:
+
+		$ /bin/date
+
+	Obviamente isso pode ser inconveniente, especialmente se o comando reside em um diretório com um caminho longo. A melhor maneira é ter comandos armazendos em diretórios bem conhecidos e depois adicioná-los para a 
+	variável de ambiente "PATH" do seu shell. O caminho consiste em uma lista de diretórios em que os comandos que você insere são verificados sequencialmente. Para ver seu caminho atual, digite o sequinte: 
+
+		$ echo $PATH
+
+	Os resultados exibem um caminho padrão comum para um usuário normal do Linux. Os diretórios são separados por dois pontos. 
+
+	##DICA: Se você quiser adicionar seus próprios comandos ou scripts shell, coloque-os no diretório "bin" no seu diretório inicial (como /home/cn/bin para o usuário chamado cn). Esse diretório é automaticamente adicionado ao seu 
+	##caminho em alguns sistemas Linux, embora possa ser necessário que você crie esse diretório ou adicione-o ao seu "PATH" em outros sistemas Linux. Então, se você adicionar o comando para diretório "bin" com permissão de execução, 
+	##pode começar a usá-lo simplesmente digitando o nome do comando no prompt do seu shell. Para tornanr os comandos disponíveis para todos os usuários, adicione-os em /usr/local/bin 
+
+	Ao contrário de alguns outros sistemas operacionais, por padrão, o Linux não verifica o diretório atual para um arquivo executável antes de procurar o caminho. Executáveis no diretório atual são executados somente se eles 
+	estiverem na variável "PATH" ou você der o endereço absoluto (como /home/matheus/scriptx.sh) ou relativo (por exemplo, ./scriptx.sh) deles.
+	Nem todos os comandos que você executa estão localizados em diretórios em sua variável "PATH". Alguns comandos estão predefinidos no shell. Outros comandos podem ser anulados criandos "aliases" que definem quaisquer comandos
+	e opções que você quer que o comando execute.Há também manieras de definir uma função que consiste em uma série armazenada de comandos.
+	Eis a ordem em que o shell verifica os comando digitados:
+		1. Aliases. Nomes definidos pelo comando "alias" que representam um determinado comando em um conjunto de opções. Digite "alias" para ver quais aliases estão definidos. Muitas vezes, os aliases permitem que você 
+		defina um nome curto para um comando longo e complicado
+		2. Palavra reservada do shell. Palavras reservadas pelo shell para uso especial. Muitas dessas são palavras que você usaria na função de digitação de programação, como "do", "while", "case" e "else"
+		3. Função. Um conjunto de comandos que são executados juntos no shell atual
+		4. Comando predefinido. Um comando predefinido no shell. Como resultado, não há nenhuma representação do comando no sistema de arquivos. Alguns dos comandos mais comuns que você vai usar são os de shell predefinidos,
+		tais como "cd" (para mudar de diretórios), "echo" (para a saída de texto para a tela), "exit" (para sair de um shell), "fg" (para trazer um comando executado em segundo plano para o primeiro plano), "history" 
+		(para ver uma lista de comandos que foram executados anteriormente), "pwd" (para listar o diretório de trabalho atual), "set" (para definir as opções de shell) e "type" (para exibir a localização de um comando)
+		5. Comando do sistema de arquivos. Esse comando é armazendo e executado dentro do sistema de arquivos do computador. Esses são os comandos que são indicados pelo valor da variável "PATH"
+	Para saber de onde um determinado comando é retirado, você pode usar o comando "type". Se você estiver usando um shell que não seja "bash", use o comando "which". Por exemplo, para descobrir onde o comando "shell bash" está
+	localizado, digite o seguinte:
+
+		$ type bash
+		bash is /bin/bash
+
+	Experimente essas poucas palvras com o comando "type" para ver outros locais dos comandos: "which", "case" e "return". Se um comando reside em vários locais, você pode adicionar a opção -a para obter todos os locais 
+	conhecidos do comando. Por exemplo, o comando
+		$ type -a ls
+	deve mostrar uma alias e localização do sistema de arquivos para o comando "ls"
+	DICA: Às vezes você executa um comando e recebe uma mensagem de erro informando que o comando não foi localizado ou que a permissão para executá-lo foi negada. Se o comando não foi encontrado, verifique se você digitou-o 
+	corretamentee e se está localizado na sua variável "PATH". Se a permissão para executar o comando foi NEGADA, ele pode estar na variável "PATH", mas pode não ser executável. Lembre-se que o Linux é case sensitive.
+	Se um comando não está na sua variável "PATH", você pode usar o comando "locate" para tentar encontrá-lo. Usando "locate" , é possível pesquisar qualquer parte do sistema que seja acessível para você (alguns arquivos são
+	acessíveis apenas para o usuário root). Por exemplo, se quisesse encontrar a localização do comando "chage", você pode digitar o seguinte:
+		$ locate chage
+	Observe que "locate" não só encontrou o comando "chage", mas também encontrou o comando "lchage" e uma variedade de páginas "man" associadas com "chage" para diferentes idiomas. O comando "locate" procura em todo seu sistema
+	de arquivos e não apenas em diretórios que contêm comandos.
+
+#LEMBRANDO COMANDOS COM O HISTÓRICO DE COMANDOS
+	Ser capaz de repetir um comando que você executou anteriormente em uma sessão de shell pode ser conveniente. Às vezes, uma linha de comando é muito longa e complexa e poder recuperá-la a partir de uma sessão anterior pode poupar
+	alguns problemas. Felizmente, alguns recursos do shell permitem recuperar e editar linhas de comandos anteriores, ou completar uma linha de comando parcialmente digitada.
+	###TECLAS DE ATALHO PARA NAVEGAR PELAS LINHAS DE COMANDO
+	#TECLA		NOME COMPLETO		SIGNIFICADO
+	alt+F		Palavra para frente	Move o cursor uma palavra para frente
+	alt+B		Palavra para trás	Move o cursor um palavra para trás
+	cntrl+A		Início da linha		Move o cursor para o início da linha atual
+	cntrl+E		Fim da linha		Move o cursor para o final da linha atual
+	cntrl+L		Limpar tela		Limpa a tela e move o cursor para a parte superior esquerda da tela
+	
+	###TECLAS DE ATALHO PARA EDITAR LINHAS DE COMANDO
+	#TECLA 		NOME COMPLETO		SIGNIFICADO
+	cntrl+D		Excluir atual		Exclui o caractere atual
+	alt+U		Palavra em maiúscula	Converte os caracteres da palavra atual em letras maiúsculas
+	alt+L		Palavra em minúscula	Converte os caracteres da palavra atual em letras minúsculas
+	alt+C		Inicial com maiúscula	Converte o caractere incial da palavra atual em letra maiúscula
+
+	##COMPLETAMENTO DE LINHA DE COMANDO
+	Para poupar algumas teclas, o shell bash oferece várias maneiras de completar os valores préviamente digitados. Eis alguns valores que você pode digitar parcialmente a partir de um shell bash:
+		- Comando, alias, ou função - Se o texto digitado começa com caracteres regulares, o shell tenta completar o texto com um comando, um alias ou um nome de função.
+		- Variável - Se o texto digitado começa com um cifrão ($), o shell completa-o com uma variável do shell atual.
+		- Nome de usuário - Se o texto digitado começa com um til ~, o shell completa-o com um nome de usuário. Como resultado, ~username indica o diretório home do usuário chamado.
+		- Hostname - Se o texto digitado começa com um sinal de arroba (@), o shell completa-o com um hostname extraído do arquivo /etc/hosts.
+	##DICA: Para adicionar nomes de máquinas a partir de um arquivo adicional, você definir a variável HOSTFILE ao nome do arquivo. O arquivo deve estar no mesmo formato do /etc/hosts.
+
+	#RECUPERAÇÃO DE LINHAS DE COMANDO
+	Para ver seu histórico utilize o comando "history". Um número precede cada linha de comando na lista. Você pode recuperar um desses comando usando um ponto de exclamação. Tenha em mente que, ao usar um ponto de exclamação 
+	o comando roda cegamente, sem lhe dar uma oportunidade para confirmar o comando que você está referenciando.
+		* !n - executa o número do comando
+		* !! - executar comando "previous". Executa a lina de comando anterior
+		* !?string? - executa o comando que contém a string. Isso executa o comando mais recente que contém uma determinada string de caracteres
+	Outra maneira de trabalhar com sua lista de histórico é usar o comando "fc". Digite "fc" seguido de um número de linha do histórico e essa linha de comando é aberta em um editor de texto (vi por padrão). Quando você sai do editor
+	o comando é executado. Você também pode dar um intervalo de números de linha (por exemplo, fc 100 105). Todos os comando são abertos no seu editor e então executados um depois do outro quando você encerra o editor. 
+	Depois de fechar seu shell, a lista de histórico é armazenado no .bash_history em seu diretório home. Por padrão, até 1000 comandos são armazenados no histórico para você.
+	###NOTA: Algumas pessoas desativam o recurso de histórico para o usuário root, defininidno HISTFILE para /dev/null ou simplesmente deixando HISTFILE em branco. Isso evita que informações sobre as atividades do usuário root sejam 
+	###potencialmente exploradas. Se você é um usuário administrativo com privilégios de root, você também pode querer considerar a possibilidade de esvaziar seu arquivo ao sair, pelas mesmas razões.
+
+#CONECTANDO E EXPANDINDO COMANDOS
+	Um recurso verdadeiramente poderoso do shell é a capacidade de redirecionar a entrada e saída de comandos para e de outros comandos e arquivos. Para permitir agrupar comandos, o shell utiliza 'metacaracteres'.
+	Um 'metacaractere' é um caractere digitado que tem significado especial para o shell para conectar comandos ou solicitar expansão.
+	'Metacaracteres' incluem o caractere de barra vertical ou pipe (|), o "e" comercial (&), ponto e vírgula (;), parêntese direito()), parêntese esquerdo ((), sinal de menor que (<) e maior que (>)
+
+	##REDIRECIONAMENTO ENTRE OS COMANDOS
+		O metacaractere de redirecionamento (|) conecta a saída de um comando à entrada de outro comando. Isso permite que você tenha um comando funcionando sobre alguns dados e, então, o próximo comando lidando com os resultados.
+		Eis um exemplo de uma linha de comando que inclui barras verticais:
+
+		$ cat /etc/passwd | sort | less
+
+	##COMANDOS SEQUENCIAIS
+		Eventualmente você pode querer que umsa sequência de comandos seja executada, com um comando sendo completado antes de o comando seguinte começar. Você pode fazer isso digitando vários comandos na mesma linha
+		de comando e separando-os com ponto e vírgula (;):
+
+		$ date ; troff -me verylargedocumente | lpr ; date
+
+		Nesse exemplo, eu estava formatando um documento enorme e quis saber quanto tempo isso levaria. O primeiro comando (date) exibiu a data e hora antes da formatação ter começado. O comando "troff" formatou o
+		documento e depois redirecionou a saída para a impressora. Quando a formatação terminou, a data e hora foram impressas novamente (então eu sabia quanto tempo o comando "troff" levou para completar)
+		Outro comando útil para adicionar ao final de uma longa linha de comando é "mail". Você pode adicionar o seguinte ao final de uma linha de comando:
+
+		$ ; mail -s "Finished the long command" matheus@example.com
+
+		Assim, por exemplo, uma mensagem de e-mail é enviada para o usuário que você escolher, após a conclusão do comando
+
+	##COMANDOS EM SEGUNDO PLANO
+		Alguns comandos podem demorar um pouco para serem concluídos. Às vezes você talvez não queira que seu shell espere que um comando termine. Nesses casos, você pode fazer os comandos executarem em segundo plano, usando o 
+		E comercial (&). Comandos de formatação de texto (como nroff e troff) são exemplos frequentemente executados em segundo plano para formatar um documento grande. Você também pode criar seus próprios scripts que são 
+		executados em segundo plano para verificar continuamente por certos acontecimentos, como disco rígido encher ou usuários específicos efetuarem login.
+		Eis um exemplo de um comando a ser executado em segundo plano:
+
+		$ troff -me verylargedocument | lpr &
+
+		Não feche o shell até que o processo seja concluído, ou ele será destruído.
+
+	##EXPANDINDO COMANDOS
+		Com a substituição  de comando, você pode ter a saída de um comando interpretada pelo shell em vez de pelo próprio comando. Dessa maneira, você pode tornar a saída padrão de um comando em um argumento para outro comando.
+		As duas maneiras de substituição de comando são $(comando) e 'comando' (crases, não aspas simples). O comando nesse caso pode incluir opções, metacaracteres e argumentos. Eis um exemplo:
+
+		$ vi $(find /home | grep xyzzy)
+
+		Nesse exemplo, a substituição de comando é feita antes de o comando "vi" ser executado. Primeiro, o comando "find" começa no diretório /home e imprime todos os arquivos e diretórios abaixo desse ponto no sistema de 
+		arquivos, exceto para aqueles que incluem a string 'xyzzy' em seu nome. Por fim, o comando "vi" abre todos os nomes que incluem a 'xyzzy' para a edição (um de cada vez). Esse exemplo em particular é útil se você quiser 
+		editar um arquivo cujo nome você conhece, mas não a localização. Desde que a string não seja comum, você pode encontrar e abrir cada ocorrência de um nome de arquivo existente abaixo de um ponto escolhido no sistema de 
+		arquivos. (Em outras palavras, não use "grep" a partir do sistema de arquivos raiz ou você vai encontrar e tentar editar vários milhares de arquivos).
+
+	##EXPANDINDO EXPRESSÕES ARITMÉTICAS
+		Pode haver ocasiões em que você deseja passar os resultados aritméticos para um comando. Há duas formas que você pode utilizar para expandir uma expressão aritmética e passá-la para o shell: $[expressão] ou $(expressão).
+		Exemplo:
+
+		$ echo "I am $[2024-1998] years old"
+		I am 26 years old
+
+		O shell interpreta a primeira expressão aritmética (2024-1998) e depois passa essas informações para o comando "echo". O comando "echo" exibe o texto, com os resultados da aritmética (26) inseridos. Eis outro exemplo:
+
+		$ echo "there are $(ls | wc -w) files in this directory"
+
+		Isso lista o conteúdo do diretório atual (ls) e executa o comando de contagem de palavras para contar o número de arquivos encontrados (wc -w). O número resultante é ecoado de volta com o resto da sentença sendo mostrado.
+
+	##EXPANDINDO VARIÁVEIS
+		Variáveis que armazenam informações dentro do shell podem ser expandidas usando o metacaractere cifrão ($). Quando você expande uma variável de ambiente em uma linha de comando, o valor da variável é impresso em vez do 
+		próprio nome da variável, como a seguir:
+
+		$ ls -l $BASH
+
+		Usando $BASH como um argumento para "ls -l" causa uma listagem do comando bash para ser impressa.
+
+#USANDO VARIÁVEIS DE SHELL
+	O próprio shell armazena informações que podem ser úteis para a sessão de shell do usuário naquilo que é chamado de 'variáveis'. Exemplos de variáveis incluem $SHELL (que identifica o shell que você está usando), $PS1 (que 
+	define a sua prompt de shell) e $MAIL (que identifica a localização da caixa de correio). Você pode ver todas as variáveis definidas para seu shell atual digitando o comando "set". Um subconjunto de variáveis locais é chamado de 
+	"variáveis de ambiente", que são exportadas para quaisquer novos shells abertos a partir do shell atual. Digite "env" para ver variáveis de ambiente.Você pode digitar "echo $VALOR", que que o VALOR é substituído pelo nome de uma 
+	variável de ambiente especial que você deseja listar. E como há sempre múltiplas maneiras de fazer qualquer coisa no Linux, você também pode digitar "declare" para obter uma lista das variáveis de ambiente atuais e seus valores, 
+	juntamente com uma lista de funções de shell.
+	Além daquelas que você mesmo define, arquivos de sistema definem variáveis que guardam as coisas, tais como locais de arquivos de configuração, caixas de correio e diretórios de caminho. Elas também podem armazenar valores para
+	prompts de shell, o tamanho da lista de histórico e o tipo do sistema operacional. Você pode consultar o valor de qualquer uma dessas variáveis precedendo-a com um cifrão ($) e colocá-la em qualquer lugar na linha de comando,
+	por exemplo:
+
+		$ echo $USER
+		matheus
+
+	Quando você inicia um shell, muitas variáveis de ambiente já estão definidas. A seguir temos algumas variáveis que são definidas quando você usa um shell bash ou que podem ser definidas por você para utilizar com recursos 
+	diferentes.
+
+	#VARIÁVEL	#DESCRIÇÃO
+	BASH		Contém o caminho completo do comando bash. Esse é geralmente bin/bash
+	BASH_VERSION	Um número da versão atual do comando bash
+	EUID		Esse é o número de ID de usuário efetivo do usuário atual. Ele é atribuído quando o shell inicia, com base na entrada do usuário no arquivo /etc/passwd
+	FCEDIT		Se definido, indica o editor de texto usado pelo comando fc para editar comandos do histórico. Se essa variável não estiver definida, o comando "vi" é usado
+	HISTFILE	A localização do seu arquivo de histórico. Ele é geralmente localizado em $HOME/.bash_history
+	HISTFILESIZE	O número de entradas de histórico que pode ser armazenado.
+	HISTCMD		Isso retorna o número do comando atual na lista de histórico
+	HOME		Esse é seu diretório inicial. É o seu diretório de trabalho atual cada vez que você entrar ou digitar o comando "cd" com qualquer opção
+	HOSTTYPE	Um valor que descreve a arquitetura do computador em que o sistema Linux está executando.
+	MAIL		Essa é a localização do seu arquivo de caixa de correio. O arquivo é geralmente seu nome de usuário no /var/spool/mail/directory
+	OLDPWD		O diretório que era o de trabalho antes de você mudar para o atual
+	OSTYPE		Um nome que identifica o sistema operacional atual
+	PATH		Uma lista de diretórios separados por dois-pontos usada para encontrar comandos que você digita. Você precisa digitar o caminho completo ou o caminho relativo para um comando que deseja executar mas que não está
+			em seu PATH
+	PPID		O processo de identificação do comando que iniciou o shell atual
+	PROMPT_COMMAND	Pode ser definido como um nome de comando que é executado cada vez antes de seu prompt de shell ser exibido. Difinir PROMPT_COMMAND=date lista a data/hora atual antes do prompt aparecer
+	PS1		Configura o valor de seu prompt de shell. Há muitos itens que podem ser interpretados no seu prompt (data, hora, nome de usuário, nome de host e assim por diante). Às vezes, um comando requer avisos adicionais,
+			que você pode definir com as variáveis PS2, PS3, assim por diante
+	PWD		Esse é o diretório que é atribuído como seu diretório atual. Esse valor muda a cada vez que você muda de diretórios usando o comando "cd"
+	RANDOM		Acessar essa variável faz com que um número aleatório seja gerado. O número está entre 0 e 99999
+	SECONDS		O número de segundos desde o momento em que o shell foi iniciado
+	SHLVL		O número de níveis de shell associados com a sessão de shell atual. Cada vez que você iniciar um novo comando bash (como, por exemplo, usar su para se tornar um novo usuário, ou simplesmente digitando bash), esse
+			número é incrementado
+	TMOUT		Pode ser configurado como um número que representa o número de segundos que o shell pode permanecer inativo sem receber entrada. Depois que o número de segundos é alcançado, o shell é encerrado. Esse é um recurso
+			se segurança que torna menos provável que shells não supervisionados sejam acessados por pessoas não autorizadas (isso deve ser configurado no shell de login para realmente fazer com que o shell efetue logout 
+			do usuário)
+	##CRIAÇÃO E USO DE ALIASES
+		Usando o comando alias, você pode efetivamente criar um atalho para qualquer comando e as opções que deseja executar mais tarde. Você pode adicionar e listar aliases com o mando "alias". Considere os seguintes exemplos do
+		uso de "alias" a partir de um shell bash:
+
+		$ alias p='pwd ; ls -CF'
+		$ alias rm='rm -i'
+
+	No primeiro exemplo, a letra p é atribuída para executar o comando "pwd", depois para executar "ls -CF" para imprimir o diretório de trabalho atual e listar seu conteúdo em forma de coluna. O segundo exemplo executa o comando
+	"rm" com a opção "-i" cada vez que você simplesmente digitar "rm". (Esse é um alias que costuma ser configurado automaticamente para o usuário root. Em vez de apenas excluir os arquivos, você será solicitado para cada exclusão
+	de arquivo individual. Isso impede que a remoção automática de todos os arquivos de um diretório ao digitar algo por engano como "rm")
+	Enquanto vocês estiver no shell, pode verificar quais aliases são definidos digitando o comando "alias". Se você quiser remover um alias, digite "unalias" (lembre-se de que se o "alias" é definido em um arquivo de configuração,
+	ele será definido novamente quando você abrir outro shell)
+
+# CRIANDO SEU AMBIENTE SHELL
+	Você pode sintonizar seu shell para ajudá-lo a trabalhar de maneira mais eficiente. Você pode definir aliases que criam atalhos para suas linhas de comando e variáveis de ambiente favoritas para armazenarem informações. 
+	Adicionando essas configurações aos arquivos de configuração do shell, você pode ter as configurações disponíveis sempre que abrir um shell.
+	
+	##CONFIGURANDO SEU SHELL
+		Vários arquivos de configuração suportam a maneira como o shell se comporta. Alguns dos arquivos são executados para cada usuário e cada shell, enquanto outros são específicos do usuário que cria o arquivo de configuração
+		A seguir, exibirei os arquivos que são de interesse para qualquer pessoa usando o shell bash no Linux
+	ARQUIVO		DESCRIÇÃO
+	/etc/profile	Configura as informações de ambiente do usuário para cada usuário. É executado quando você faz login pela primeira vez. Esse arquivo fornece valores para seu caminho, além de definir as variáveis de ambiente para
+			as coisas como o local de sua caixa de correio e o tamanho dos arquivos do seu histórico. Por fim, o arquivo /etc/profile reúne as configurações do shell de arquivos de configuração no diretório /etc/profile.d
+	/etc/bashrc	Executa para cada usuário que roda o shell bash, sempre que um shell bash é aberto. Ele configura o prompt padrão e pode adicionar um ou mais aliases. Valores nesse arquivo podem ser substituídos por informações
+			no arquivo ~/.bashrc de cada usuário
+	~/.bash_profile	Utilizado por cada usuário para inserir informações que são específicas do seu uso do shell. É executado apenas uma vez: quando o usuário faz login. Por padrão, configura algumas variáveis de ambiente e executa
+			o arquivo .bashrc do usuário. Esse é um bom lugar para adicionar variáveis de ambiente, porque, uma vez configuradas, elas são herdadas por shells futuros
+	~/.bashrc	Contém informações específicas dos shells bahs do usuário. Ele é lido quando você efetua login e também todas as vezes que abre um novo shell bash. Esse é o melhor local para adicionar aliases para o shell usar
+	~/.bash_logout	Executa cada vez que você faz logout (sai do último shell bash). Por padrão, ele simplesmente limpa sua tela.
+
+	Para alterar os arquivos /etc/profile ou /etc/bashrc, você deve ser o usuário root.
+	
+	##CONFIGURANDO SEU PROMPT
+		Seu prompt consiste em um conjutno de caracteres que aparecem sempre que o shell está pronto para aceitar um comando. A variável de ambiente PS1 define o que contém o aviso e é com o que você interage a maior parte do 
+		tempo. Se o shell requer entrada adicional, ele usa os valores de PS2, PS3 e PS4.
+		Quando seu sistema Linux é instalado, um prompt costuma ser configurado para conter mais do que apenas um sinal de cifrão ou de jogo da velha. Por exemplo, no Fedora ou no Red Hat Enterprise Linux, o prompt é configurado
+		para incluir as seguintes informações: seu nome de usuário, o nome do host e o nome de base do seu diretório de trabalho atual. Eis um exemplo desse prompt:
+		
+		[matheus@myhost bin]$
+
+		##DICA: Se você está definindo seu prompt temporariamente digitando no shell, deve colocar o valor de PS1 entre aspas. Por exemplo, você pode digitar "export PS1="[\t \w\$"" para ver um prompt parecido com este: 
+		#[20:26:32 /var/spool]$
+		Para fazer uma alteração permanente em seu prompt, adicione o valor de PS1 para seu .bashrc em seu diretório home. Pode já haver um valor PS1 no arquivo que você pode modificar. Consulte o Bash Prompt HOWTO para obter
+		informações sobre alteração de cores, comandos e outros recursos do prompt do shell bash.
+
+	##ADICIONANDO VARIÁVEIS DE AMBIENTE
+		
+#OBTENDO INFORMAÇÕES SOBRE COMANDOS
+#RESUMO
+#EXERCÍCIOS

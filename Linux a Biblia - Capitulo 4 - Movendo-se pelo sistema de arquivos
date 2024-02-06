@@ -1,0 +1,75 @@
+CAPITULO 4 - MOVENDO-SE PELO SISTEMA DE ARQUIVOS
+
+@NESTE CAPÍTULO
+APRENDENDO SOBRE O SISTEMA DE ARQUIVOS LINUX
+LISTANDO ATRIBUTOS DE ARQUIVO E DIRETÓRIO
+CRIANDO ARQUIVOS E DIRETÓRIOS
+LISTANDO E ALTERANDO PERMISSÕES E POSSE
+FAZENDO CÓPIAS E MOVENDO ARQUIVOS
+
+O sistema de arquivos Linux é a estrutura em que todas as informações sobre seu computador estão armazenadas. Na verdade, uma das propriedades que definiem os sistemas UNIX, em que se baseia o Linux, é que quanse tudo o que você precisa 
+identificar em seu sistema (dados, comandos, links simbólicos, dispositivos e diretórios) é representado por itens nos sistemas de arquivos.
+No Linux, os arquivos são organizados dentro de uma hierarquia de diretórios. Cada diretório pode conter arquivos e outros diretórios. Se você mapeasse os arquivos e diretórios no Linux, ele seria parecido com uma árvore de cabeça para 
+baixo. No alto, está o diretório raiz (que não deve ser confundido com o usuário root), que é representado por uma única barra (/). Abaixo disso, está um conjunto de diretórios comuns no sistema Linux, como "bin", "dev", "home", "lib" e 
+"tmp", para citar alguns. Cada um desses diretórios, bem como diretórios adicionados ao diretório raiz, pode conter subdiretórios.
+Eis alguns dos diretórios do Linux que podem lhe interessar:
+	- /bin -	Contém comandos comuns de usuários Linux, como ls, sort, date e chmod.
+	- /boot -	Contém o kernel inicializável do Linux e os arquivos do carregador de inicialização (GRUB).
+	- /dev -	Contém arquivos que representam os pontos de acesso a dispositivos em seus sistemas. Esses incluem dispositivos "terminal" (tty*), disquetes (fd*), disco rígido (hd* ou sd*), RAM (ram*) e CD-ROM (cd*). Os usuários 
+			podem acessar esses dispositivos diretamente através desses arquivos de dispositivo, mas alguns aplicativos ocultam dos usuários finais o nome dos dispositivos reais.
+	- /etc		Contém os arquivos de configuração administrativa. A maioria desses arquivos são de texto simples que, desde que o usuário tenha a devida permissão, podem ser editados em qualquer editor de texto.
+	- /home		Contém diretórios atribuídos a cada usuário regular com uma conta de login. (O usuário root é uma exceção, usando /root como seu diretório inicial.)
+	- /media	Fornece uma localização padrão para dispositivos de automontagem (mídia removível em particular). Se o produto possuir um nome de volume, esse nome é normalmente usado como ponto de montagem. Por exemplo, um drive
+			USB com um nome de volume "myusb" seria montado em /media/myusb .
+	- /lib		Contém bibliotecas compartilhadas requeridas por aplicativos em /bin e /sbin para inicializar o sistema.
+	- /mnt		Um ponto de montagem comum para muitos dispositivos, antes de ser suplantado pelo diretório /media padrão. Alguns sistemas Linux inicializáveis ainda usam esse diretório para montar partições de disco rígido e
+			sistemas de arquivos remotos. Muitas pessoas ainda usam esse diretório para montar temporariamente sistemas de arquivos locais ou remotos que não são montados de forma permanente.
+	- /misc -	Um diretório usado às vezes para montar sistemas de arquivos mediante solicitação.
+	- /opt -	Estrutura de diretórios disponíveis para armazenar software suplementar.
+	- /proc -	Contém informações sobre recursos do sistema.
+	- /root	-	Representa o diretório do usuário root. O diretório inicial de root não reside sob /home por razões de segurança.
+	- /sbin -	Contém comandos administrativos e processos de daemon.
+	- /tmp -	Contém arquivos temporários usados pelos aplicativos.
+	- /usr -	Contém a documentação do usuário, jogos, arquivos gráficos (X11), bibliotecas (lib) uma variedade de outros comandos e arquivos que não são necessários durante o processo de inicialização.
+	- /var -	Contém diretórios de dados utilizados por vários aplicativos. Em particular, esse é o lugar onde você coloca os arquivos que você compartilha, como um servidor FTP (/var/ftp) ou um servidor web (/var/www). Ele 
+			também contém todos os arquivos de log do sistema (/var/log) e arquivos de spool /var/spool (como mail, cups e news).
+	##NOTA: No Fedora e no Red Hat Enterprise Linux, quando você adiciona um novo usuário, o usuário é atribuído a um grupo de mesmo nome, por padrão. Essa abordagem para a atribuição de grupos é referida como esquema de grupo 
+	##privado do usuário
+
+#USANDO METACARACTERES E OPERADORES
+	Quer você esteja listando, movendo, copiando, removendoou de outra forma atuando sobre os arquivos em seu sistema Linux, alguns caracteres especiais, chamados de metacaracteres e operadores, ajudam-no a trabalhar com arquivos de
+	forma mais eficiente. Metacaracteres podem ajudá-lo a localizar um ou mais arquivos sem digitar completamente o nome de cada arquivo. Operadores permitem que você direcione a informação de um comando ou arquivo para outro comando
+	ou arquivo.
+		- * -	Localiza qualquer número de caracteres.
+		- ? -	Localiza qualquer caractere.
+		- [] -	Localiza qualquer um dos caracteres enter os colchetes, o que pode incluir uma gama de letras ou números separados por hífen.
+	O comando "touch" cria arquivos vazios.
+
+	##UTILIZANDO METACARACTERES PARA REDIRECIONAMENTO DE ARQUIVOS
+		Comandos recebem dados da entrada padrão e os enviam para a saída padrão. Utilizando redirecionamento, você pode direcionar a saída padrão de um comando para a entrada padrão de outro. Com os arquivos, você pode usar os
+		sinais de menor que (<) e maior que (>) para direcionar dados de e para arquivos. Eis os caracteres de redirecionamento de arquivo:
+			- < -	Direciona o conteúdo de um arquivo para o comando. Na maioria dos casos, essa é a ação padrão esperada pelo comando e o uso do caractere é opcional; utilizar "less bigfile" é o mesmo que "less < bigfile".
+			- > -	Direciona a saída padrão de um comando para um arquivo. Se o arquivo existir, o conteúdo dele será sobrescrito.
+			- 2> -	Direciona mensagens de erro padrão (standard error) para o arquivo.
+			- &> -	Direciona tanto a saída padrão como o erro padrão para o arquivo.
+			- >> -	Direciona a saída de um comando para um arquivo, adicionando a saída ao final do arquivo existente.
+	
+	##USO DE CARACTERES DE EXPANSÃO
+		Usando chaves ({}), você pode expandir um conjunto de caracteres em todos os nomes de arquivo, nomes de diretórios ou outros argumentos que você dá aos comandos. Por exemplo, se quiser criar um conjunto de arquivos, como 
+		memo1 a memo5, você pode fazer isso da seguinte maneira:
+		
+			$ touch memo{1,2,3,4,5}
+		
+		Os itens que são expandidos não precisam ser números ou mesmo dígitos individuais. Por exemplo, você poderia usar intervalos de números ou dígitos. Você também pode usar qualquer string de caracteres, desde que os separe
+		com vírgulas. Eis alguns exemplos:
+
+			$ touch {John,Bill, Sally}-{breakfast,lunch,dinner}
+			$ ls
+			John-breakfast John-lunch John-dinner .... etc
+			$ touch {a..f}{1..5}
+			$ ls
+			a1 a2 a3 b1 b2 b3 f1 f2 f3 .... etc
+
+		No primeiro exemplo, o uso de dois conjutnos de chaves significa que John, Bill e Sally têm nomes de arquivos associados a breakfast, lunch e dinner. Se tivesse cometido um erro, eu poderia facilmente recuperar o comando
+		e mudar "touch" para "rm -f" para excluir todos os arquivos. No exemplo a seguir, o uso de dois pontos entre as letras A e F e os números 1 e 5 especifica os intervalos a serem utilizados.
+#LISTANDO ARQUIVOS E DIRETÓRIOS
