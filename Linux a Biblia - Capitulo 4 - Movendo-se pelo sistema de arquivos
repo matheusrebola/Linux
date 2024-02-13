@@ -73,3 +73,245 @@ Eis alguns dos diretórios do Linux que podem lhe interessar:
 		No primeiro exemplo, o uso de dois conjutnos de chaves significa que John, Bill e Sally têm nomes de arquivos associados a breakfast, lunch e dinner. Se tivesse cometido um erro, eu poderia facilmente recuperar o comando
 		e mudar "touch" para "rm -f" para excluir todos os arquivos. No exemplo a seguir, o uso de dois pontos entre as letras A e F e os números 1 e 5 especifica os intervalos a serem utilizados.
 #LISTANDO ARQUIVOS E DIRETÓRIOS
+	O comando ls eh o mais utilizado para listar informacoes sobre arquivos e diretorios. Muitas opcoes disponiveis com o comando ls permitem reunir 
+	diferentes conjuntos de arquivos e diretorios, bem como ver diferentes tipos de informacoes sobre eles.
+	Por padrao, quando voce digita o comando ls, o resultado exibe todos os arquivos e diretorios nao ocultos contidos no diretorio atual. Quando voce 
+	digita ls, porem, muitos sistemas Linux atribuem um alias ls para adicionar opcoes.
+	A opcao --color=auto faz com que diferentes tipos de arquivos e diretorios sejam exibidos em cores diferentes. Digitar ls -l para ver uma longa lista 
+	desses arquivos pode tornar esses diferentes tipos de arquivo ainda mais claros.
+	Ao examinar a longa lista mostrada, note que o primeiro caractere de cada linha exibe o tipo de arquivo. Um hifen (-) indica um arquivo regular, um d
+	um diretorio e um l (L minusculo) indica um link simbolico. Um arquivo executavel (um script ou arquivo binario que funciona como um comando) tem os 
+	bits de execucao ativados (x).
+	Eis alguns fatos sobre arquivos e listas de diretorios:
+		* O numero de caracteres exibidos para um diretorio reflete o tamanho do arquivo que contem informacoes sobre o diretorio.
+		* O formato da coluna de hora e data pode variar.
+		* Ocasionalmente, em vez de ver o bit de execucao (x) configurado em um arquivo executavel, voce pode ver um s no lugar. Com um s aparecendo 
+		dentro das permissoes do proprietario (-rwsr-xr-x), ou do grupo (-rwxr-sr-x), ou ambas (-rwsr-sr-x), o aplicativo pode ser executado por 
+		qualquer usuario, mas a posse do processo em execucao eh atribuida ao usuario/grupo do aplicativo em vez do usuario que inicia o comando. 
+		Isso eh referido como um programa set UID ou set GID, respectivamente. Por exemplo, o comando mount tem o conjunto de permissoes -rwsr-xr-x. 
+		Isso permite que qualquer usuario execute mount para listar sistemas de arquivos montados (embora voce ainda tenha de ser root para usar mount
+		a fim de realmente montar sistemas de arquivos, na maioria dos casos).
+		* Se um t aparecer no fianl de um diretorio, isso indica que o sticky bit esta configurado para esse diretorio (por exemplo, drwxrwxr-t). Ao 
+		Configurar o sticky bit em um diretorio, o proprietario desse diretorio pode permitir que outros usuarios e grupos adicionem arquivos a ele, 
+		mas impede que os usuarios excluam os arquivos uns dos outros nesse diretorio. Com um conjunto GID atribuido a um diretorio, todos os arquivos
+		criados nele sao atribuidos ao mesmo grupo desse diretorio. (Se voce vir um S maiusculo ou T em vez de bits de execucao em um diretorio, isso 
+		significa que a permissao set GID ou stick bit, respectivamente, foi configurada, mas por alguma razao o bit de execucao tambem nao foi 
+		ativado.)
+		* Se voce vir um sinal de mais no final dos bits de permissao (por exemplo, -rw-rw-r--+), isso significa que os atributos estendidos, como 
+		listas de controle de acesso (ACLs) ou SELinux, estao configuradas no arquivo.
+
+	#IDENTIFICANDO DIRETORIOS
+		Quando precisar identificar seu diretorio inicial em uma linha de comando do shell, voce pode usar o seguinte:
+			- $HOME - Essa variavel de ambiente armazena o nome do diretorio inicial.
+			- ~ - O til (~) representa seu diretorio inicial na linha de comando.
+		Voce tambem pode usar o til para identificar o diretorio inicial de outro usuario. Por exemplo, ~joe seria expandido para o diretorio inicial
+		joe (provavelmente /home/joe). Entao, se quisesse ir para o diretorio /home/joe/test , eu poderia digitar cd ~joe/test para chegar la.
+		Outras maneiras especiais de identificar diretorios no shell incluem o seguinte:
+			- . - Um unico ponto (.) referencia o diretorio atual.
+			- .. _ Dois pontos (..) referenciam um diretorio diretamente acima do diretorio atual.
+			- $PWD - Essa variavel de ambiente referencia o diretorio de trabalho atual.
+			- $OLDPWD - Essa variavel de ambiente referencia o diretorio de trabalho anterior, antes de voce mudar para o atual. (Digitar cd - 
+			retorna para o diretorio representado por $OLDPWD).
+	
+	Qualquer arquivo ou diretorio comecando com um ponto (.) eh considerado um arquivo oculto e nao eh exibido por padrao com ls. A opcao -a permite que 
+	voce veja os arquivos. A opcao -t exibe arquivos na ordem em que eles foram mais recentemente modificados. Com a opcao -F, uma barra (/) aparece no 
+	final do nome dos diretorios, um asterisco (*) eh adicionado aos arquivos executaveis e um sinal de arroba (@) eh mostrado ao lado de links simbolicos.
+	Para mostrar arquivos ocultos e nao ocultos:
+		$ ls -a
+	Para listar todos os arquivos pela data/hora da ultima modificacao:
+		$ ls -at
+	Para listar arquivos e anexar indicadores do tipo arquivo:
+		$ ls -F
+	
+	Para evitar a exibicao de determinados arquivos ou diretorios quando voce usa ls, use a opcao --hide=. A opcao -d em um diretorio exibe informacoes 
+	sobre o diretorio em vez de mostrar os arquivos e diretorios que esse diretorio contem. A opcao -R lista todos os arquivos no diretorio atual, bem como
+	quaisquer arquivos ou diretorios que estao associados ao diretorio original. A opcao -S lista arquivos por tamanho.
+	Para nao incluir todos os arquivos que comecam com a letra g na lista:
+		$ ls --hide=g*
+	Para listar informacoes sobre um diretorio em vez dos arquivos que ele contem:
+		$ ls -ld $HOME/Documentos/
+	Para criar multiplas camadas de diretorio (-p eh necessario):
+		mkdir -p $HOME/Documentos/Estudos/Linux/
+	Para listar todos os arquivos e diretorios recursivamente a partir do diretorio atual para baixo:
+		$ ls -R
+	Para listar os arquivos por tamanho:
+		$ ls -S
+
+#ENTENDENDO PERMISSOES E POSSE DE ARQUIVOS
+	Permissoes associadas a arquivos e diretorios no Linux foram projetadas para impedir que os usuarios acessem arquivos privados de outros usuarios e 
+	para proteger arquivos importantes do sistema.
+	Os nove bits atribuidos para cada permissao de arquivo definem o acesso que voce e outros tem ao seu arquivo. Bits de permissao para um arquivo regular
+	aparecem como -rwxrwxrwx. Esses bits sao usados para definir quem pode ler, gravar ou executar o arquivo
+
+	#NOTA: Para um arquivo regular, umtraco aparece na frente do indicador de permissoes de nove bits. Em vez de um traco, voce pode ver um d (para 
+	diretorio), l (para link simbolico), b (para dispositivo de bloco), c (para dispositivo de caracteres), s (para soquete), ou p (para pipe nomeado).
+
+		Das permissoes de nove bits, os tres primeiros bits se aplicam a permissao do proprietario, os tres seguintes se aplicam ao grupo atribuido
+		ao arquivo e os tres ultimos se aplicam a todos os outros. O r significa permissao de leitura, o w significa permissao de gravacao e x 
+		significa permissao de execucao. Se aparecer um traco em vez de letra, significa que a permissao esta desativada para esse bit associado de
+		leitura, gravacao ou execucao.
+
+	Como os arquivos e diretorios sao diferentes tipos de elementos, permissoes de leitura, gravacao e execucao sobre arquivos e diretorios significam 
+	coisas diferentes.
+
+	PERMISSAO	ARQUIVO			DIRETORIO
+	Read		Visualiza o que esta	Visualiza os arquivos e subpastas que ele contem.
+			no arquivo.
+	Write		Altera o conteudo do	Adiciona arquivos ou subdiretorios aos diretorios.
+			arquivo, o renomeia	Remove arquivos ou diretorios do diretorio.
+			ou o exclui.
+	Execute		Executa o arquivo	Muda para o diretorio como o diretorio atual, pesquisa no diretorio ou executa um programa a partir do
+			como um programa.	diretorio. Acessa metadados (tamanho do arquivo, registro de data e hora e etc.) de arquivos no diretorio.
+
+	Como observado anteriormente, voce pode ver a permissao para qualquer arquivo ou diretorio digitando o comando ls -ld.
+
+	##ALTERANDO PERMISSOES COM CHMOD (NUMEROS)
+		Se possuir um arquivo, voce pode usar o comando chmod para alterar as permissoes sobre ele como quiser. Um metodo de fazer isso, a cada 
+		permissao (leitura, gravacao e execucao) eh atribuida um numero - r=4, w=2 e x=1 - eh usar o numero total de cada conjunto para estabelecer
+		a permissao. Por exemplo, para tornar as permissoes abertas para voce mesmo como proprietario, voce deve configurar o primeiro numero como 7
+		(4+2+1) e, entao, voce daria ao grupo e aos outros, permissao de somente leitura, configurando o segundo e o terceiro numeros com 4 (4+0+0), de
+		modo que o numero final eh 744. Qualquer combinacao de permissoes pode resultar de 0 (sem permissao) a 7 (plena permissao).
+		Eis alguns exemplos de como alterar permissoes sobre um arquivo (chamado file) e o que a permissao resultante seria:
+		O comando chmod a seguir resulta nesta permissao: rwxrwxrwx
+			# chmod 777 file
+		O comando chmod a seguir resulta nesta permissao: rwxr-xr-x
+			# chmod 755 file
+		O comando chmod a seguir resulta nesta permissao: rw-r--r--
+			# chmod 644 file
+		O comando chmod a seguir resulta nesta permissao: ---------
+			# chmod 000 file
+
+		O comando chmod tambem pode ser utilizado de forma recursiva. Por exemplo, digamos que voce queira dar a uma estrutura de diretorio inteira a
+		permissao 755 (rwxr-xrx), comecando no diretorio $HOME/myapps. Para fazer isso, voce pode usar a opcao -R, como segue:
+			$ chmod -R 755 $HOME/myapps
+
+		Todos os arquivos e diretorios abaixo, incluindo o diretorio myapss em seu diretorio incial, terao o conjunto de permissoes 755. Como a 
+		abordagem numerica para configurar permissoes altera todos os bits de permissao de uma so vez, eh mais comum o uso de letras para recursivamente
+		alterar os bits de permissao de um conjunto grande de arquivos.
+
+	##ALTERANDO PERMISSOES COM CHMOD (LETRAS)
+		Voce tambem pode ativar e desativar as permissoes de arquivo usando os sinais de mais (+) e menos (-), respectivamente, junto com letras para
+		indicar o que muda e para o usuario (u), grupo (g), outros (o) e todos os usuarios (a). O que voce mudaria inclui os bits de leitura (r),
+		gravacao (w) e execucao (x). Por exemplo, comece com um arquivo que tem todas as permissoes abertas (rwxrwxrwx). Execute os seguintes comandos
+		chmod usando as opcoes do sinal de menos.
+		O comando chmod a seguir resulta nesta permissao: r-xr-xr-x
+			$ chmod a-w file
+		O comando chmod a seguir resulta nesta permissao: rwxrwxrw-
+			$ chmod o-x file
+		O comando chmod a seguir resulta nesta permissao: rwx------
+			$ chmod go-rwx file
+
+		Da mesma forma, os exemplos que se seguem comecam com todas as permissoes fechadas (---------). O sinal positivo eh usado com chmod para ativar
+		permissoes.
+		O comando chmod a seguir resulta nesta permissao: rw-------
+			$ chmod u+rw files
+		O comando chmod a seguir resulta nesta permissao: --x--x--x
+			$ chmod a+x files
+		O comando chmod a seguir resulta nesta permissao: r-xr-x---
+			$ chmod ug+rx files
+
+		Usar letras para alterar a permissao recursivamente com chmod geralmente funciona melhor do que usar numeros, porque voce pode alterar os bits 
+		de forma seletiva, em vez de mudar todos os bits de permissao de uma vez. Por exemplo, digamos que voce deseja remover a permissao de gravacao
+		para "outros" sem alterar nenhum outro bit de permissao em um conjunto de arquivos e diretorios. Voce poderia fazer o seguinte:
+			$ chmod -R o-w $HOME/myapps
+
+		Este exemplo remove recursivamente as permissoes de gravacao para os "outros" em todos os arquivos e diretorios abaixo do diretorio /myapps. Se
+		voce tivesse usado numeros como 644, a permissao de execucao seria desativada para diretorios; usando 755, a permissao de execucao seria ativada
+		para arquivos regulares. Usando o-w, apenas um bit eh desativado e todos os outros bits sao deixados intactos.
+
+	##CONFIGURANDO A PERMISSAO DE ARQUIVO PADRAO COM UMASK
+		Quando voce cria um arquivo como um usuario comum, este recebe a permissao rw-rw-r-- por padrao. Um diretorio recebe a permissao rwxrwxr-x. Para
+		o usuario root, as permissoes sobre arquivo e diretorio sao rw-r--r-- e rwxr-xr-x, respectivamente. Esses valores padrao sao determinados pelo
+		valor de umask. Digite umask para ver qual eh seu valor de umask. Por exemplo:
+			$ umask
+			 0002
+
+		Se voce ignorar o primeiro zero por um momento, o valor umask mascara o que eh considerado como sendo permissoes completamente abertas para um 
+		arquivo 666 ou diretorio 777. O valor umask de 002 resulta na permissao 755 sobre um diretorio (rwxrwxr-x). Esse mesmo umask resulta em uma 
+		permissao 644 sobre um arquivo (rw-rw-r--). (Permissoes de execucao estao desativadas por padrao para arquivos regulares.)
+
+		Para alterar temporariamente seu valor de umask, execute o comando umask. Agora, experimente criar alguns arquivos e diretorios para ver como o 
+		valor umask afeta o modo como as permissoes sao configuradas. Por exemplo:
+			$ umask 777
+			  d---------
+			$ umask 000
+			  drwxrwxrwx
+			  -rw-rw-rw-
+			$ umask 022
+			  drwxr-xr-x
+			  -rw-r--r--
+
+		Se quiser alterar permanentemente seu valor de umask, adicione um comando umask ao arquivo .bashrc em seu diretorio inicial. Da proxima vez que
+		voce abrir um shell, o umask sera configurado com o valor que voce escolheu.
+
+	##ALTERANDO A POSSE DE ARQUIVO
+		Como um usuario comum, voce nao pode alterar a posse de um arquivo ou diretorio para que eles pertencam a outro usuario. Voce pode alterar a 
+		posso como usuario root. Por exemplo, digamos que voce criou um arquivo chamado memo.txt enquanto era o usuario root, no diretorio inicial do 
+		usuario joe. Veja como voce pode altera-lo para ser possuido por joe:
+			# chown joe /home/joe/memo.txt
+			# ls -l /homem/joe/memo.txt
+		  	  -rw-r--r--. 1 joe root 0 Dec 19 11:23 /home/joe/memo.txt
+
+		Note que o comando chmod alterou o usuario joe, mas deixou o grupo como root. Para alterar o usuario e o grupo para joe, voce pode digitar o 
+		seguinte comando no lugar:
+			# chown joe:joe /home/joe/memo.txt
+			# ls -l /home/joe/memo.txt
+		  	  -rw-r--r--. 1 joe joe 0 Dec 19 11:23 /home/joe/memo.txt
+
+		O comando chown tambem pode ser usado recursivamente. Usar a opcao recursiva (-R) eh util se voce precisar alterar uma estrutura de diretorio 
+		inteira para ser possuida por um determinado usuario. Por exemplo, se voce inseriu um pen drive, que eh montado no diretorio /media/myusb, e 
+		quiser dar posse plena sobre o conteudo dessa unidade para o usuario joe, voce pode digitar o seguinte:
+			# chown -R joe:joe /media/myusb
+
+#MOVENDO, COPIANDO E EXCLUINDO ARQUIVOS
+	Comandos parar mover, copiar e excluir arquivos sao relativamente simples. Para alterar a localizacao de um arquivo, use o comando mv. Para copiar um
+	arquivo de um local para outro, use o comando cp. Para excluir um arquivo, use o comando rm. Esses comandos podem ser usados para agir sobre arquivos
+	e diretorios individuais, ou recursivamente para agir sobre muitos arquivos e diretorios de uma so vez. Eis alguns exemplos:
+		$ mv abc def
+		$ mv abc ~
+		$ mv /home/joe/mymemos/ /home/joe/Documentos
+
+	O comando mv primeiro move o arquivo abc para o arquivo def no mesmo diretorio (essencialmente renomeado), enquanto o segundo move o arquivo abc para 
+	seu diretorio inicial (~). O proximo comando move o diretorio mymemos (e todo seu conteudo) para o diretorio /home/joe/Documentos.
+
+	Por padrao, o comando mv sobrescreve todos os arquivos existentes, se houver arquivos com mesmo nome no destino. Mas muitos sistemas Linux fornecem um
+	alias ao comando mv para que ele use a opcao -i (que faz o mv perguntar antes se voce quer sobrescrever arquivos existentes). Eis como verificar se isso
+	eh verdade em seu sistema:
+		$ alias mv
+		  alias mv='mv -i'
+
+	Eis alguns exemplos de como usar o comando cp para copiar arquivos de um local para outro:
+		$ cp abc def
+		$ cp abc ~
+		$ cp -r /usr/share/doc/bash-completion* /tmp/a/
+		$ cp -ra /usr/share/doc/bash-completion* /tmp/b/
+
+	O primeiro comando copy (cp) copia abc para o novo nome def no mesmo diretorio, enquanto o segundo copia abc para o seu diretorio inicial (~), mantendo
+	o nome abc. Os dois comandos de copia recursiva (-r) copiam o diretorio bash-completion, e todos os arquivos que ele contem, primeiro para os novos 
+	diretorios /tmp/a/ e /tmp/b/. Se voce usar ls -l nesses dois diretorios com a opcao archive (-a), os registros de data/hora e as permissoes sao mantidos
+	pela copia, mas sem o -a, a data e a hora atuais sao usadas e as permissoes sao determinadas pelo seu umask.
+	O comando cp normalmente tambem eh usando na forma de uma alias com a opcao -i, para evitar sobrescrever os arquivos inadvertidamente.
+
+	Tal como acontece com os comandos cp e mv, rm tambem eh geralmente usado com um alias para incluir a opcao -i. Isso pode impedir o dano que possa vir de
+	uma exclusao recursiva (-r) inadvertida. Eis alguns exemplos do comando rm:
+		$ rm abc
+		$ rm *
+
+	O primeiro comando removedor exclui o arquivo abc, o segundo remove todos os arquivos do diretorio atual (exceto diretorios e/ou quaisquer arquivos que
+	comecam com um ponto). Se quiser excluir um diretorio, voce precisa usar a opcao recursiva (-r) para rm ou, para um diretorio vazio, voce pode usar o
+	comando rmdir. Considere os seguintes exemplos:
+		$ rmdir /home/joe/nothing/
+		$ rm -r /home/joe/bigdir/
+		$ rm -rf /home/joe/hugedir/
+
+	O comando rmdir no codigo anterior so remove o diretorio (nothing) se ele estiver vazio. O exemplo rm -r remove o diretorio bigdir e todo seu conteudo
+	(arquivos e varios niveis de subdiretorios), mas pedira confirmacao antes de cada um ser removido. Ao adicionar a opcao de forca (-f), o diretorio 
+	hugedir e todo seu conteudo sao imediatamente removidos, sem avisar.
+
+	##ATENCAO: Toda vez que voce sobrescreve a opcao -i nos comandos mv, cp e rm, voce arrisca excluir alguns (ou muitos) dos arquivos por engano. Usar 
+	curingas (como *) e nenhum -i torna os erros ainda mais provaveis. Dito isso, ha momentos em que voce nao quer se incomodar em percorrer cada arquivo
+	que exclui. Voce tem outras opcoes:
+		* Como observado com a opcao -f, voce pode forcar rm a excluir sem perguntar. Uma alternativa eh executar rm, cp ou mv com uma barra invertida
+		na frente dele (\rm bigdir). A barra invertida faz com que qualquer comando execute sem alias.
+		* Outra alternativa com mv eh usar a opcao -b. Com -b, se um arquivo de mesmo nome existir no destino, uma copia de backup do arquivo antigo eh
+		feita antes de o novo arquivo ser movido para la.
